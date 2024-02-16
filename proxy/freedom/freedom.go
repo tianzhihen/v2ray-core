@@ -4,9 +4,12 @@ package freedom
 
 import (
 	"context"
+	"fmt"
 	"time"
+	// "runtime/debug"
 
 	core "github.com/v2fly/v2ray-core/v5"
+	"github.com/v2fly/v2ray-core/v5/common/log"
 	"github.com/v2fly/v2ray-core/v5/common"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/dice"
@@ -90,6 +93,7 @@ func isValidAddress(addr *net.IPOrDomain) bool {
 
 // Process implements proxy.Outbound.
 func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer internet.Dialer) error {
+	
 	outbound := session.OutboundFromContext(ctx)
 	if outbound == nil || !outbound.Target.IsValid() {
 		return newError("target not specified.")
@@ -126,6 +130,10 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 	if err != nil {
 		return newError("failed to open connection to ", destination).Base(err)
 	}
+	currentTime := time.Now().Format("2006-01-02 15:04:05.000000")
+	AccessInfo := log.AccessMessageFromContext(ctx)
+	fmt.Println("[extra access info]: ", currentTime, conn.LocalAddr(), AccessInfo)
+
 	defer conn.Close()
 
 	plcy := h.policy()
